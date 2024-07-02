@@ -3,6 +3,7 @@ from pytube import YouTube
 from tkinter import filedialog
 import os
 import threading
+import re
 
 class YouTubeDownloader:
     def __init__(self):
@@ -49,13 +50,17 @@ class YouTubeDownloader:
             if not stream:
                 self.status_label.configure(text="No suitable video stream found")
                 return
+            
+            # Sanitize the file name
+            safe_title = self.sanitize_filename(yt.title)
+            default_filename = f"{safe_title}.mp4"
 
             default_path = os.path.join(os.path.expanduser("~"), "Downloads")
             save_path = filedialog.asksaveasfilename(
                 initialdir=default_path,
                 defaultextension=".mp4",
                 filetypes=[("MP4 files", "*.mp4")],
-                initialfile=f"{yt.title}.mp4"
+                initialfile=default_filename
             )
 
             if not save_path:
@@ -87,6 +92,15 @@ class YouTubeDownloader:
 
     def clear_url_entry(self):
         self.url_entry.delete(0, 'end')
+
+    def sanitize_filename(self, filename):
+        # Remove invalid characters
+        filename = re.sub(r'[\\/*?:"<>|]', "", filename)
+        # Replace spaces with underscores
+        # filename = filename.replace(" ", "_")
+        # Limit length to 255 characters
+        filename = filename[:255]
+        return filename
 
     def run(self):
         self.window.mainloop()
